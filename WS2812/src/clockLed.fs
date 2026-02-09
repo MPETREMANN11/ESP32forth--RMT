@@ -15,7 +15,5 @@
 RECORDFILE /spiffs/clockLed.fs
 
 
-
-
 <EOF>
 

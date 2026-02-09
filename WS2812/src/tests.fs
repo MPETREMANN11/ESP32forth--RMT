@@ -2,7 +2,7 @@
 \ tests for ESP32 Fastled
 \    Filename:      tests.fs
 \    Date:          06 feb 2026
-\    Updated:       07 feb 2026
+\    Updated:       08 feb 2026
 \    File Version:  1.0
 \    MCU:           ESP32-S3 - ESP32 WROOM
 \    Forth:         ESP32forth all versions 7.0.7.21+
@@ -14,43 +14,41 @@
 
 RECORDFILE /spiffs/tests.fs
 
-\ 1. Créer un espace mémoire pour la config
+\ Créer un espace mémoire pour la config
 create &my-rmt-config
 &my-rmt-config initRmtConfiguration
 
+also rmt
 : setupRmtStructure ( addr -- )
     >r
-    1 r@ rmtSetMode
-    2 r@ rmtSetChannel
-   22 r@ rmtSetGpio
-\     1                &config rmt_clk_div c!
-\     1                &config rmt_mem_block_num c!
+    RMT_MODE_TX r@ rmtSetMode
+    RMT_CHANNEL r@ rmtSetChannel
+    RMT_GPIO    r@ rmtSetGpio
+              1 r@ rmtSetClkDiv
+              1 r@ rmtSetMemBlockNum
+\           38000 r@ rmtSetCarrierFreq
     r> drop
-;
+    RMT_CHANNEL 1       rmt_set_clk_div drop
+\     RMT_CHANNEL 1       rmt_set_mem_block_num drop
+\     RMT_CHANNEL 0       rmt_set_tx_loop_mode drop
+    RMT_CHANNEL 0 1 1 0 rmt_set_tx_carrier drop
+\     config.tx_config.idle_output_en = true;
+\     config.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
+  ;
+
+    
 
 
-
-
-also rmt
+\ rmt_config(&config);
+&my-rmt-config setupRmtStructure
 &my-rmt-config rmt_config
 
-&my-rmt-config setupRmtStructure
+\ rmt_driver_install(config.channel, 0, 0);
 
 only FORTH
 
-&my-rmt-config RMT_CONFIG dump
+&my-rmt-config _RMT_CONFIG dump
 hex &my-rmt-config . decimal
 
 <EOF>
-
-
-\ 2. Remplir les champs
-\ RMT_MODE_TX      ma-config rmt_mode !
-\ 0                ma-config rmt_channel !
-\ 18               ma-config rmt_gpio_num !
-\ 80               ma-config rmt_clk_div c!   \ 1 tick = 1 microseconde
-\ 1                ma-config rmt_mem_block_num c!
-
-
-
 

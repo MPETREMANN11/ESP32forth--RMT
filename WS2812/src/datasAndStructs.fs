@@ -1,10 +1,11 @@
 \ *************************************
-\ datas and structures for ESP32 Fastled
-\    Filename:      tests.fs
-\    Date:          06 feb 2026
-\    Updated:       06 feb 2026
+\ datas and structures for RMT 2.0
+\    Filename:      datasAndStructs.fs
+\    Date:          08 feb 2026
+\    Updated:       08 feb 2026
 \    File Version:  1.0
 \    MCU:           ESP32-S3 - ESP32 WROOM
+\    RMT:           2.0
 \    Forth:         ESP32forth all versions 7.0.7.21+
 \    Copyright:     Marc PETREMANN
 \    Author:        Marc PETREMANN
@@ -13,11 +14,6 @@
 
 
 RECORDFILE /spiffs/datasAndStructs.fs
-
-\ *** General constants and values *********************************************
-
-0 constant RMT_MODE_TX      \ for TX mode
-1 constant RMT_MODE_RX      \ for RX mode
 
 also structures
 
@@ -47,52 +43,47 @@ struct RGB          \ define RGB structure
     RGB * allot
   ;
 
-\ *** Structure for RMT config *************************************************
+\ *** Structures for RMT TX ****************************************************
 
-struct RMT_TX_CONFIG
-   u32 field ->carrier_freq_hz      \ RMT carrier frequency
-   u32 field ->carrier_level        \ Level of the RMT output, when the carrier is applied
-   u32 field ->idle_level           \ RMT idle level
-    u8 field ->carrier_duty_percent \ RMT carrier duty (%)
-    u8 field ->carrier_en           \ RMT carrier enable
-    u8 field ->loop_en              \ Enable sending RMT items in a loop
-    u8 field ->idle_output_en       \ RMT idle level output enable
 
-struct RMT_RX_CONFIG
-   u16 field ->idle_threshold       \ RMT RX idle threshold
-    u8 field ->filter_ticks_thresh  \ RMT filter tick number
-    u8 field ->filter_en            \ RMT receiver filter enable
+\ rmt_tx_event_callbacks_t
 
-\ source: https://docs.espressif.com/projects/esp-idf/en/v4.1/api-reference/peripherals/rmt.html#_CPPv412rmt_config_t
-struct RMT_CONFIG
-   u32 field ->rmt_mode             \ 0: TX, 1: RX RMT mode: transmitter or receiver
-   u32 field ->rmt_channel          \ 0-7 RMT channel
-   u32 field ->rmt_gpio_num         \ RMT GPIO number
-    u8 field ->rmt_clk_div          \ uint8_t (1-255) RMT channel counter divider
-    u8 field ->rmt_mem_block_num    \ uint8_t RMT memory block number
-RMT_TX_CONFIG field ->tx_config
-RMT_RX_CONFIG field ->rx_config
+struct rmt_tx_channel_config_t
+    u32 field ->gpio_num            \ GPIO number used by RMT TX channel. Set to -1 if unused
+    u32 field ->clk_src             \ Clock source of RMT TX channel
+    u32 field ->resolution_hz       \ Channel clock resolution, in Hz 
+    u32 field ->mem_block_symbols   \ Size of memory block
+    u32 field ->trans_queue_depth   \ Depth of internal transfer queue
+    u32 field ->intr_priority
+    u32 field ->flags_packed      \ Regroupe with_dma, loop_back, od_mode, etc.
 
-\ initialize RMT_CONFIG structure
-: initRmtConfiguration { addr -- }
-    RMT_CONFIG allot
-    addr RMT_CONFIG 0 fill
-  ;
+\ Comment remplir flags_packed ?
+\ Chaque option occupe un ou plusieurs bits spécifiques dans ce dernier u32. Voici les masques binaires à utiliser :
+\     invert_out : bit 0 (valeur 1)
+\     with_dma : bit 1 (valeur 2)
+\     io_loop_back : bit 2 (valeur 4)
+\     io_od_mode : bit 3 (valeur 8)
+\     allow_pd : bit 4 (valeur 16)
+\     init_level : bit 5 (valeur 32)
 
-\ initialize rmt mode
-: rmtSetMode ( mode addr -- )
-    ->rmt_mode !
-  ;
 
-\ initialize channel
-: rmtSetChannel ( channel addr -- )
-    ->rmt_channel !
-  ;
+\ RMT transmit specific configuration.
+struct rmt_transmit_config_t
+    i32 field ->loop_count          \ Specify the times of transmission in a loop
+                                    \ -1 means transmitting in an infinite loop
+    u32 field ->eot_level           \ Set the output level for the "End Of Transmission"
+    u32 field ->queue_nonblocking   \ If set, when the transaction queue is full, 
+                                    \ driver will not block the thread but return directly
+    u32 field ->tx_config_flags     \ Transmit specific config flags
 
-\ initialize gpio
-: rmtSetGpio ( gpio addr -- )
-    ->rmt_gpio_num !
-  ;
+
+\ Synchronous manager configuration
+struct rmt_sync_manager_config_t
+    u32 field ->rmt_channel_handle_t \ *tx_channel_array
+                                    \ Array of TX channels that are about to be managed by a synchronous controller
+    u32 field ->array_size          \ Size of the tx_channel_array
+    u32 field ->wait_flags          \ Attendre que tous les canaux soient prêts
+
 
 only FORTH
 

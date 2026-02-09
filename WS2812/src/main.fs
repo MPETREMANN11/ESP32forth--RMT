@@ -20,10 +20,11 @@ DEFINED? --espFastled [if] forget --espFastled  [then]
 create --espFastled
 
 include /spiffs/datasAndStructs.fs
-include /spiffs/fastleds.fs
-include /spiffs/clockLed.fs
-include /spiffs/assert.fs
-include /spiffs/tests.fs
+\ include /spiffs/config.fs
+\ include /spiffs/fastleds.fs
+\ include /spiffs/clockLed.fs
+\ include /spiffs/assert.fs
+\ include /spiffs/tests.fs
 
 <EOF>
 
