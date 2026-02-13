@@ -22,14 +22,16 @@ RECORDFILE /spiffs/fastleds.fs
 
 also rmt
 
-0 value tx_channel
-0 value encodeHandle
+\ *** Initialisation RMT *******************************************************
+
+0 value channelHandle
+0 value encoderHandle
 
 : initWS2812 ( -- )
     initGPIO    \ defined in fastleds.fs
-    RMT_GPIO prepare_ws2812_config
+    RMT_GPIO RMT_RES prepare_ws2812_config
     ?dup if
-        to tx_channel
+        to channelHandle
     else
         ." erreur initialisation canal RMT" cr
     then
@@ -37,17 +39,21 @@ also rmt
     RMT_RES rmt_new_ws2812_encoder  \ Résolution 1MHz sur la pile
                                     \ Retourne le handle de l'encodeur ou 0
     ?dup if                                    
-        to encodeHandle
+        to encoderHandle
     else
         ." erreur initialisation encodeur RMT" cr
     then
-
   ;
 
+\ Define a empty structure for rmt_transmit
+create TRANSMIT_CONFIG
+    rmt_transmit_config_t allot
+    TRANSMIT_CONFIG rmt_transmit_config_t 0 fill
+ 
 only FORTH
 
 
-\ *** Other datas **************************************************************
+\ *** Definition of basic color LEDs sets **************************************
 
 \ Define named color
 : RGBcolor: ( comp: r g b -- <name> | exec: -- r g b )
@@ -70,6 +76,46 @@ only FORTH
 255 165   0 RGBcolor: RGB_Orange
 128   0 128 RGBcolor: RGB_Purple
 255 192 203 RGBcolor: RGB_Pink
+
+\ *** set and manage LEDs array ************************************************
+
+create LEDS                 \ array for these LEDs
+    NB_LEDS RGB_struct * allot
+
+: nLED!  ( r g b position -- )
+    NB_LEDS 1- min             \ sécurité anti-débordement
+    RGB_struct * LEDS +     \ calcul adresse réelle
+    RGB!
+  ;
+
+\ set all LEDs to zero
+: resetLEDs ( -- )
+    LEDS NB_LEDS RGB_struct * 0 fill
+  ;
+
+\ store LED at position n in LEDS array
+: nLED!  ( r g b position -- )
+    NB_LEDS 1- min             \ sécurité anti-débordement
+    RGB_struct * LEDS +     \ calcul adresse réelle
+    RGB!
+  ;
+
+also rmt
+
+\ transmit LEDs stored in LEDS array
+: transmitLEDS ( -- )
+    channelHandle 0= if
+        initWS2812
+    then
+    channelHandle rmt_disable drop      \ 1. On s'assure que le canal est propre
+    channelHandle rmt_enable drop       \ --- Étape 2 : Activation ---
+    channelHandle encoderHandle LEDS NB_LEDS TRANSMIT_CONFIG rmt_transmit
+    ?dup if
+        ." Erreur transmission LEDs" cr
+    then
+  ;
+
+only FORTH
 
 <EOF>
 
