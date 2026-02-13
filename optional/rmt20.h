@@ -27,6 +27,7 @@
 #include "driver/rmt_tx.h" // Le nouveau driver TX (Version 3.0+)
 #include "driver/rmt_rx.h" // Le nouveau driver RX (Version 3.0+)
 #include "driver/rmt_encoder.h"
+#include "driver/periph_ctrl.h"
 
 class MyRMTDevice {
 private:
@@ -54,6 +55,7 @@ bool IRAM_ATTR my_on_rx_done(rmt_channel_handle_t ch, const rmt_rx_done_event_da
 // source: https://docs.espressif.com/projects/arduino-esp32/en/latest/api/rmt.html
 
 // RMT RX/TX: https://github.com/espressif/esp-idf/tree/master/components/esp_driver_rmt/include/driver
+//            https://github.com/espressif/arduino-esp32/blob/2cfe8da/docs/en/api/rmt.rst
 
 
 #define OPTIONAL_RMT_VOCABULARY V(rmt)
@@ -63,13 +65,15 @@ YV(rmt, rmt_new_rx_channel, \
     rmt_channel_handle_t handle = NULL; \
     const rmt_rx_channel_config_t* cfg = (const rmt_rx_channel_config_t*)n0; \
     esp_err_t err = rmt_new_rx_channel(cfg, &handle); \
-    n0 = (err == ESP_OK) ? (cell_t)handle : 0; ) \
-/** rmt_new_tx_channel ( config -- handle|0 ) */ \
-YV(rmt, rmt_new_tx_channel, \
-    rmt_channel_handle_t handle; \
-    rmt_tx_channel_config_t* config = (rmt_tx_channel_config_t*)n0; \
-    esp_err_t err = rmt_new_tx_channel(config, &handle); \
-    n0 = (err == ESP_OK) ? (cell_t)handle : 0; ) \
+    n0 = (err == ESP_OK) ? (cell_t)handle : 0; NIP ) \
+/** rmt_new_tx_channel ( config handle -- err ) */ \
+YV(rmt, rmt_new_tx_channel, ({ \
+    rmt_channel_handle_t* _ret_chan = (rmt_channel_handle_t*)n0; \
+    rmt_tx_channel_config_t* _config = (rmt_tx_channel_config_t*)n1; \
+    esp_err_t _err = rmt_new_tx_channel(_config, _ret_chan); \
+    n1 = (cell_t)_err; \
+    DROP; \
+})) \
 /** f_rmt_disable ( handle -- err ) */  \
 YV(rmt, rmt_disable, \
     rmt_disable((rmt_channel_handle_t)n0); DROP ) \
@@ -157,8 +161,20 @@ YV(rmt, rmt_new_ws2812_encoder, \
     _config.bit1.level1 = 0; \
     _config.flags.msb_first = 1; \
     esp_err_t err = rmt_new_bytes_encoder(&_config, &_enc); \
-    n0 = (err == ESP_OK) ? (cell_t)_enc : 0; )
-
+    n0 = (err == ESP_OK) ? (cell_t)_enc : 0; ) \
+/** prepare_ws2812_confi ( gpio -- handle|0 ) */ \
+YV(rmt, prepare_ws2812_config, \
+    gpio_num_t pin = (gpio_num_t)n0; \
+    rmt_channel_handle_t handle = NULL; \
+    rmt_tx_channel_config_t tx_cfg = {}; \
+    tx_cfg.clk_src = (rmt_clock_source_t)RMT_CLK_SRC_DEFAULT; \
+    tx_cfg.gpio_num = pin; \
+    tx_cfg.mem_block_symbols = 64; \
+    tx_cfg.resolution_hz = 1000000; \
+    tx_cfg.trans_queue_depth = 4; \
+    tx_cfg.flags.with_dma = 0; \
+    esp_err_t err = rmt_new_tx_channel(&tx_cfg, &handle); \
+    n0 = ((err == ESP_OK ? (cell_t)handle : 0)) )
 
 
 
