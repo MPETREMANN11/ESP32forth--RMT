@@ -2,7 +2,7 @@
 \ words for ESP32 Fastled
 \    Filename:      fastled.fs
 \    Date:          06 feb 2026
-\    Updated:       08 feb 2026
+\    Updated:       13 feb 2026
 \    File Version:  1.0
 \    MCU:           ESP32-S3 - ESP32 WROOM
 \    Forth:         ESP32forth all versions 7.0.7.21+
@@ -12,37 +12,40 @@
 \ **************************************
 
 
+\ exemple en ligne: https://circuitlabs.net/rmt-for-ws2812-neopixel-led-control/ 
+
 RECORDFILE /spiffs/fastleds.fs
 
-\     // RMT configuration
-\     rmt_config_t config = {};
-\     config.rmt_mode = RMT_MODE_TX;
-\     config.channel = rmtChannel;
-\     config.gpio_num = (gpio_num_t)DATA_PIN;
-\     config.clk_div = 1;  // 80MHz
-\     config.mem_block_num = 1;
-\     config.tx_config.loop_en = false;
-\     config.tx_config.carrier_en = false;
-\     config.tx_config.idle_output_en = true;
-\     config.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
-\     
-\     rmt_config(&config);
-\     rmt_driver_install(config.channel, 0, 0);
-\     
-\     initialized = true;
+: initGPIO ( -- )
+    RMT_GPIO OUTPUT pinMode 
+  ;
 
+also rmt
 
-rmt also
+0 value tx_channel
+0 value encodeHandle
 
-create &config
-&config initRmtConfiguration
+: initWS2812 ( -- )
+    initGPIO    \ defined in fastleds.fs
+    RMT_GPIO prepare_ws2812_config
+    ?dup if
+        to tx_channel
+    else
+        ." erreur initialisation canal RMT" cr
+    then
+    \ Créer un encodeur à 10 Mhz
+    RMT_RES rmt_new_ws2812_encoder  \ Résolution 1MHz sur la pile
+                                    \ Retourne le handle de l'encodeur ou 0
+    ?dup if                                    
+        to encodeHandle
+    else
+        ." erreur initialisation encodeur RMT" cr
+    then
 
-\ : rmtConfig ( -- )
-\     &config rmt_config  ?dup
-\     if  ." Erreur RMT: " . abort  then
-\   ;
+  ;
 
 only FORTH
+
 
 \ *** Other datas **************************************************************
 
@@ -67,9 +70,6 @@ only FORTH
 255 165   0 RGBcolor: RGB_Orange
 128   0 128 RGBcolor: RGB_Purple
 255 192 203 RGBcolor: RGB_Pink
-
-
-
 
 <EOF>
 

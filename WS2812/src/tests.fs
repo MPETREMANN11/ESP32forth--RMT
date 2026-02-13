@@ -2,7 +2,7 @@
 \ tests for ESP32 Fastled
 \    Filename:      tests.fs
 \    Date:          06 feb 2026
-\    Updated:       08 feb 2026
+\    Updated:       10 feb 2026
 \    File Version:  1.0
 \    MCU:           ESP32-S3 - ESP32 WROOM
 \    Forth:         ESP32forth all versions 7.0.7.21+
@@ -14,41 +14,29 @@
 
 RECORDFILE /spiffs/tests.fs
 
-\ Créer un espace mémoire pour la config
-create &my-rmt-config
-&my-rmt-config initRmtConfiguration
+initWS2812
 
-also rmt
-: setupRmtStructure ( addr -- )
-    >r
-    RMT_MODE_TX r@ rmtSetMode
-    RMT_CHANNEL r@ rmtSetChannel
-    RMT_GPIO    r@ rmtSetGpio
-              1 r@ rmtSetClkDiv
-              1 r@ rmtSetMemBlockNum
-\           38000 r@ rmtSetCarrierFreq
-    r> drop
-    RMT_CHANNEL 1       rmt_set_clk_div drop
-\     RMT_CHANNEL 1       rmt_set_mem_block_num drop
-\     RMT_CHANNEL 0       rmt_set_tx_loop_mode drop
-    RMT_CHANNEL 0 1 1 0 rmt_set_tx_carrier drop
-\     config.tx_config.idle_output_en = true;
-\     config.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
-  ;
-
-    
-
-
-\ rmt_config(&config);
-&my-rmt-config setupRmtStructure
-&my-rmt-config rmt_config
-
-\ rmt_driver_install(config.channel, 0, 0);
-
-only FORTH
-
-&my-rmt-config _RMT_CONFIG dump
-hex &my-rmt-config . decimal
 
 <EOF>
+
+
+: .config  ( conf -- )
+    >r
+    ." ->gpio_num          " r@ ->gpio_num @ . cr
+    ." ->clk_src           " r@ ->clk_src @ . cr
+    ." ->resolution_hz     " r@ ->resolution_hz @ . cr
+    ." ->mem_block_symbols " r@ ->mem_block_symbols @ . cr
+    ." ->trans_queue_depth " r@ ->trans_queue_depth @ . cr
+    ." ->intr_priority     " r@ ->intr_priority @ . cr
+    ." ->flags_packed      " r@ ->flags_packed @ . cr
+    cr ." tx-config : " tx-config hex . decimal cr
+    cr r@ 128 dump
+    rdrop
+  ;
+
+
+
+
+
+
 
