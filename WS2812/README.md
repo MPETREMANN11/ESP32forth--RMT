@@ -1,11 +1,7 @@
 # Driwing WS2812 with FORTH for ESP32
 
 
-<iframe width="1303" height="733" 
-  src="https://www.youtube.com/embed/aCv46673pEc" 
-  title="ESP32forth démo courte couronne LED simulant une horloge programmée en FORTH pour carte ESP32" 
-  frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
-</iframe>
+<a href="https://www.youtube.com/embed/aCv46673pEc" target="_blank">https://www.youtube.com/embed/aCv46673pEc</a>
 
 <p>The WS2812 is an addressable RGB LED that integrates a red, green, and blue LED with a built-in controller in a single package.</p>
 <p>Each LED can be individually controlled using a single-wire digital communication protocol.
