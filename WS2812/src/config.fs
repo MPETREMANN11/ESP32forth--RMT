@@ -16,11 +16,6 @@ RECORDFILE /spiffs/config.fs
 
 \ *** RMT General constants and values *****************************************
 decimal
-\ WS2812B timing constants (FastLED proven values)
-\ 80MHz RMT clock = 12.5ns per tick
-\ 32 constant T0H_TICKS   \ 0 code high time (400ns)
-\ 64 constant T1H_TICKS   \ 1 code high time (800ns)  
-\ 52 constant TL_TICKS    \ Both low times (650ns average)
 
  0 constant RMT_MODE_TX     \ for TX mode
  1 constant RMT_MODE_RX     \ for RX mode
@@ -39,21 +34,18 @@ ESP32-S3? [IF]    \ soc_periph_rmt_clk_src_t
     3 constant RMT_CLK_SRC_DEFAULT   \ Select APB as the default choice 
 [THEN]
 
-1000 1000 * 10 * value RMT_RES      \ 10 MHz = 100ns par tick
+1000 1000 * 10 * value RMT_RES       \ 10 MHz = 100ns par tick
 
  0 value RMT_CHANNEL     \ choice RMT channel
 
-ESP32-S3? [IF]    48 constant SOC_RMT_MEM_WORDS_PER_CHANNEL   [THEN]
-ESP32?    [IF]    64 constant SOC_RMT_MEM_WORDS_PER_CHANNEL   [THEN]
+\ ESP32-S3? [IF]    48 constant SOC_RMT_MEM_WORDS_PER_CHANNEL   [THEN]
+\ ESP32?    [IF]    64 constant SOC_RMT_MEM_WORDS_PER_CHANNEL   [THEN]
 
-\ *** LEDs constants and values ************************************************
+\ *** Other values *************************************************************
 
 18 constant RMT_GPIO        \ used GPIO
 
 60 constant NB_LEDS         \ defined for ring with 60 LEDs
-create LEDS                 \ array for these LEDs
-    NB_LEDS RGB_struct * allot     \ 
-0 value BRIGHTNESS          \ LEDs brightness 
 
 <EOF>
 

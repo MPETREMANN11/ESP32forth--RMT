@@ -2,7 +2,7 @@
 \ tests for ESP32 Fastled
 \    Filename:      tests.fs
 \    Date:          06 feb 2026
-\    Updated:       10 feb 2026
+\    Updated:       13 feb 2026
 \    File Version:  1.0
 \    MCU:           ESP32-S3 - ESP32 WROOM
 \    Forth:         ESP32forth all versions 7.0.7.21+
@@ -14,29 +14,28 @@
 
 RECORDFILE /spiffs/tests.fs
 
-initWS2812
+resetLEDs
+10 setIntensity
+RGB_Black 0 nLED!
+RGB_Red 1 nLED!
+RGB_Green 2 nLED!
+RGB_Blue 3 nLED!
+RGB_Yellow 4 nLED!
+RGB_Cyan 5 nLED!
+RGB_Magenta 6 nLED!
+RGB_White 7 nLED!
+RGB_Orange 8 nLED!
+RGB_Purple 9 nLED!
+RGB_Pink 10 nLED!
 
+transmitLEDS
+LEDS hex . decimal
+LEDS 20 dump
+
+
+resetLEDs
+transmitLEDS
 
 <EOF>
-
-
-: .config  ( conf -- )
-    >r
-    ." ->gpio_num          " r@ ->gpio_num @ . cr
-    ." ->clk_src           " r@ ->clk_src @ . cr
-    ." ->resolution_hz     " r@ ->resolution_hz @ . cr
-    ." ->mem_block_symbols " r@ ->mem_block_symbols @ . cr
-    ." ->trans_queue_depth " r@ ->trans_queue_depth @ . cr
-    ." ->intr_priority     " r@ ->intr_priority @ . cr
-    ." ->flags_packed      " r@ ->flags_packed @ . cr
-    cr ." tx-config : " tx-config hex . decimal cr
-    cr r@ 128 dump
-    rdrop
-  ;
-
-
-
-
-
 
 

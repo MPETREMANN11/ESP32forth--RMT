@@ -2,7 +2,7 @@
 \ datas and structures for RMT 2.0
 \    Filename:      datasAndStructs.fs
 \    Date:          08 feb 2026
-\    Updated:       08 feb 2026
+\    Updated:       13 feb 2026
 \    File Version:  1.0
 \    MCU:           ESP32-S3 - ESP32 WROOM
 \    RMT:           2.0
@@ -21,22 +21,35 @@ also structures
 
 \ define RGB structure
 struct RGB_struct
-    i8 field ->r
     i8 field ->g
+    i8 field ->r
     i8 field ->b
 
 \ get values from RGB address
 : RGB@ { addr -- r g b }
-    addr ->r c@
     addr ->g c@
+    addr ->r c@
     addr ->b c@
+  ;
+
+\ determine LED intensity in range 0..100
+100 value INTENSITY 
+
+: setIntensity ( n -- )
+    100 min 0 max
+    to INTENSITY
+  ;
+
+\ modify LED intensity
+: adjustIntensity ( color -- color' )
+    INTENSITY 100 */
   ;
 
 \ store r g b in RGB address
 : RGB! { r g b addr -- }
-    r addr ->r c!
-    g addr ->g c!
-    b addr ->b c!
+    r adjustIntensity addr ->r c!
+    g adjustIntensity addr ->g c!
+    b adjustIntensity addr ->b c!
   ;
 
 \ *** Structures for RMT TX ****************************************************
@@ -71,9 +84,5 @@ struct rmt_sync_manager_config_t
 
 only FORTH
 
-
-
 <EOF>
-
-
 
