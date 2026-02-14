@@ -106,10 +106,11 @@ also rmt
 : transmitLEDS ( -- )
     channelHandle 0= if
         initWS2812
+        channelHandle rmt_disable drop      \ 1. On s'assure que le canal est propre
+        channelHandle rmt_enable drop       \ --- Étape 2 : Activation ---
     then
-    channelHandle rmt_disable drop      \ 1. On s'assure que le canal est propre
-    channelHandle rmt_enable drop       \ --- Étape 2 : Activation ---
-    channelHandle encoderHandle LEDS NB_LEDS TRANSMIT_CONFIG rmt_transmit
+    channelHandle encoderHandle 
+    LEDS NB_LEDS RGB_struct * TRANSMIT_CONFIG rmt_transmit
     ?dup if
         ." Erreur transmission LEDs" cr
     then
