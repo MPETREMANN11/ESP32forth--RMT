@@ -27,8 +27,8 @@ struct RGB_struct
 
 \ get values from RGB address
 : RGB@ { addr -- r g b }
-    addr ->g c@
     addr ->r c@
+    addr ->g c@
     addr ->b c@
   ;
 

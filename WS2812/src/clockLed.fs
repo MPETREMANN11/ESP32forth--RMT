@@ -25,9 +25,7 @@ only FORTH
 
 \ get values from CLOCK address
 : CLOCK@ { addr -- r g b intensity }
-    addr ->g c@
-    addr ->r c@
-    addr ->b c@
+    addr RGB@
     addr ->intensity c@
   ;
 
@@ -109,11 +107,6 @@ RGB_red    20 CLOCKcolor: CLOCK_HH
         1000 ms
     again
   ;
-
-\ tasks 
-\ : hi   begin ." Time is: " ms-ticks . cr 1000 ms again ; 
-\ ' hi 100 100 task my-counter 
-\ my-counter start-task 
 
 <EOF>
 

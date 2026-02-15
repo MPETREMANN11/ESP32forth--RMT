@@ -82,12 +82,6 @@ only FORTH
 create LEDS                 \ array for these LEDs
     NB_LEDS RGB_struct * allot
 
-: nLED!  ( r g b position -- )
-    NB_LEDS 1- min             \ sécurité anti-débordement
-    RGB_struct * LEDS +     \ calcul adresse réelle
-    RGB!
-  ;
-
 \ set all LEDs to zero
 : resetLEDs ( -- )
     LEDS NB_LEDS RGB_struct * 0 fill
@@ -95,7 +89,7 @@ create LEDS                 \ array for these LEDs
 
 \ store LED at position n in LEDS array
 : nLED!  ( r g b position -- )
-    NB_LEDS 1- min             \ sécurité anti-débordement
+    NB_LEDS 1- min          \ sécurité anti-débordement
     RGB_struct * LEDS +     \ calcul adresse réelle
     RGB!
   ;

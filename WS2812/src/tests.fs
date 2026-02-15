@@ -42,7 +42,7 @@ RECORDFILE /spiffs/tests.fs
 \ my-counter start-task 
 
 
-22 34 00 RTC.set-time { hh mm ss -- }
+15 57 00 RTC.set-time
 ' displayClock 100 100 task my-clock
 my-clock start-task
 
