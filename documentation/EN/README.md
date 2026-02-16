@@ -1,2 +1,2 @@
 
-<img src="couverture.jpg"/>
+<img src="couverture_EN.jpg"/>
